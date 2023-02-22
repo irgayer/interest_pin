@@ -1,11 +1,13 @@
 <script>
+	import CollectionCard from "../../lib/collections/collection-card.svelte";
+
     export let data;
 </script>
 
 <main>
     <h1>Recent Collections</h1>
     {#each data.collections as collection}
-        <div class="card">
+        <!-- <div class="card">
             <div class="card-header">
 				<h5>{collection.title}</h5>
 			</div>
@@ -17,6 +19,7 @@
             <div class="card-footer text-muted">
                 <p>{collection.type} collection</p>
             </div>
-        </div>
+        </div> -->
+        <CollectionCard {collection} />
     {/each}
 </main>

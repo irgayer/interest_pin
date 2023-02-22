@@ -1,17 +1,107 @@
 <script>
-    export let collection;
+	import { page } from "$app/stores";
+	import { onMount } from "svelte";
+
+
+	export let collection;
+    let copied;
+    let inherited;
+
+	function copyCollection() {
+        fetch('/api/collections/copy', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                collectionId: collection._id
+            })
+        }).then((res) => {
+            if (res.status === 200) {
+                copied = true;
+            } else {
+                console.log('error');
+            }
+        });
+    }
+
+    function inheritCollection() {
+        fetch('/api/collections/inherit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                collectionId: collection._id
+            })
+        }).then((res) => {
+            if (res.status === 200) {
+                inherited = true;
+            } else {
+                console.log('error');
+            }
+        });
+    }
+
+    onMount(async () => {
+        const res = await fetch('/api/collections/copy', {
+            method: 'GET',
+            body: JSON.stringify({
+                collectionId: collection._id,
+                userId: $page.data.user.id
+            }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await res.json();
+        copied = data.copied;
+
+        const res2 = await fetch('/api/collections/inherit', {
+            method: 'GET',
+            body: JSON.stringify({
+                collectionId: collection._id,
+                userId: $page.data.user.id
+            }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const data2 = await res2.json();
+        inherited = data2.inherited;
+    });
 </script>
 
 <div class="card">
-    <div class="card-header">
-        <h5>{collection.title}</h5>
-    </div>
-    <img src={collection.cover.image} class="card-img-top" alt="..." />
-    <div class="card-body">
-        <p class="card-text">{collection.description}</p>
-        <a href="/collections/{collection._id}" class="btn btn-primary">View</a>
-    </div>
-    <div class="card-footer text-muted">
-        <p>{collection.type} collection</p>
-    </div>
+	<div class="card-header">
+		<h5>{collection.title}</h5>
+	</div>
+	<img src={collection.cover.image} class="card-img-top" alt="..." />
+	<div class="card-body">
+		<p class="card-text">{collection.description}</p>
+		<a href="/collections/{collection._id}" class="btn btn-primary text-decoration-none"
+			>View {collection.posts.length} posts</a
+		>
+		<div class="btn-group" role="group" aria-label="Basic example">
+            {#if !copied}
+			    <button type="button" class="btn btn-secondary" on:click={copyCollection}>Copy</button>
+            {/if}
+
+            {#if !inherited}
+			<button type="button" class="btn btn-secondary" on:click={inheritCollection}>Follow</button>
+            {/if}
+
+            {#if copied}
+                <button type="button" class="btn btn-secondary" disabled>Copied</button>
+            {/if}
+
+            {#if inherited}
+                <button type="button" class="btn btn-secondary" disabled>Following</button>
+            {/if}
+		</div>
+	</div>
+
+	<div class="card-footer text-muted">
+		<p>{collection.type} collection</p>
+	</div>
 </div>

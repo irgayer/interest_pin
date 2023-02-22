@@ -8,11 +8,13 @@
 	<Header />
 
 	<main>
-		<slot />
+		<div class="container">
+			<slot />
+		</div>
 	</main>
 
 	<footer>
-		<p>visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to learn SvelteKit</p>
+		<p>Yerbol Irgaliyev. SE-2113. 2023.</p>
 	</footer>
 </div>
 

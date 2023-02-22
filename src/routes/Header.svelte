@@ -1,7 +1,5 @@
 <script>
 	import { page } from '$app/stores';
-	import logo from '$lib/images/svelte-logo.svg';
-	import github from '$lib/images/github.svg';
 </script>
 
 <header>
@@ -24,21 +22,53 @@
 					<li class="nav-item">
 						<a class="nav-link active" aria-current="page" href="/posts">Recent posts</a>
 					</li>
+					{#if $page.data.user}
 					<li class="nav-item">
 						<a class="nav-link active" href="/posts/my">My posts</a>
 					</li>
 					<li class="nav-item">
 						<a class="nav-link active" href="/posts/create">Create post</a>
 					</li>
+					{/if}
 					<li class="nav-item">
 						<a class="nav-link active" href="/collections">Recent Collections</a>
 					</li>
+					{#if $page.data.user}
 					<li class="nav-item">
 						<a class="nav-link active" href="/collections/my">My collections</a>
 					</li>
 					<li class="nav-item">
 						<a class="nav-link active" href="/collections/create">Create collection</a>
 					</li>
+					{/if}
+				</ul>
+				<ul class="navbar-nav mb-2 mb-lg-0">
+					{#if !$page.data.user}
+						<div class="btn-group" role="group" aria-label="Basic example">
+							<li class="nav-item">
+								<a class="btn btn-primary active text-decoration-none" href="/auth/login">Login</a>
+							</li>
+							<li class="nav-item">
+								<a class="btn btn-success active text-decoration-none" href="/auth/register"
+									>Register</a
+								>
+							</li>
+						</div>
+					{/if}
+					{#if $page.data.user}
+						<li class="nav-item">
+							<a class="btn btn-primary active text-decoration-none" href="/im">Profile</a>
+						</li>
+						<li class="nav-item">
+							<form action="/auth/logout" method="POST">
+								<button
+									type="submit"
+									class="btn btn-danger active text-decoration-none"
+									href="/profile">Logout</button
+								>
+							</form>
+						</li>
+					{/if}
 				</ul>
 				<!-- <form class="d-flex" role="search">
 			  <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">

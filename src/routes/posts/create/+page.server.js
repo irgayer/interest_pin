@@ -16,11 +16,12 @@ export const actions = {
         }
         let post = {title, image, description, params: {file_name: upload}, date: Date.now()};
 
-        posts.insertOne(post);
+        let inserted = await posts.insertOne(post);
         return {
             status: 201,
             body: JSON.stringify({ message: 'Post created' }),
-            success: true
+            success: true,
+            id: inserted.insertedId.toString()
         }
     }
 }

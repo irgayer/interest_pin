@@ -1,9 +1,14 @@
 import { posts } from "$db/posts";
+import { redirect, error } from "@sveltejs/kit";
 import { ObjectId } from 'mongodb';
 
 export async function load({params}) {
     const {id} = params;
     let post = await posts.findOne({_id: new ObjectId(id)});
+
+    if (!post) {
+        throw error(404, 'Not Found')
+    }
 
     post._id = post._id.toString();
     if (post === null)
@@ -53,9 +58,48 @@ export const actions = {
             throw error(404, 'Not Found');
         }
         await posts.deleteOne({_id: new ObjectId(id)});
+        throw redirect (300, '/posts/my');
+        //{
+        //     status: 200,
+        //     body: JSON.stringify({ message: 'Post deleted' }),
+        //     success: true
+        // }
+    },
+    addTheme: async (event) => {
+        const data = await event.request.formData();
+        const theme = data.get('themeName');
+        const {id} = event.params;
+
+        let post = await posts.findOne({_id: new ObjectId(id)});
+        if (post === null)
+        {
+            throw error(404, 'Not Found');
+        }
+
+        await posts.updateOne({_id: new ObjectId(id)}, {$addToSet: {themes: theme}});
         return {
             status: 200,
-            body: JSON.stringify({ message: 'Post deleted' }),
+            body: JSON.stringify({ message: 'Theme added' }),
+            success: true
+        }
+
+    },
+
+    deleteTheme: async(event) => {
+        const data = await event.request.formData();
+        const theme = data.get('themeName');
+        const {id} = event.params;
+
+        let post = await posts.findOne({_id: new ObjectId(id)});
+        if (post === null)
+        {
+            throw error(404, 'Not Found');
+        }
+
+        await posts.updateOne({_id: new ObjectId(id)}, {$pull: {themes: theme}});
+        return {
+            status: 200,
+            body: JSON.stringify({ message: 'Theme deleted' }),
             success: true
         }
     }

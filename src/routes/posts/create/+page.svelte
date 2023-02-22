@@ -32,5 +32,6 @@
     </form>
     {#if form?.success === true}
         <p>Post Created!</p>
+        <a href="/posts/{form.id}/edit">Add themes?</a>
     {/if}
 </main>

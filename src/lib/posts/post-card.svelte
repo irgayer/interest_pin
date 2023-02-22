@@ -1,6 +1,5 @@
 <script>
-	import { onMount } from "svelte";
-
+	import { onMount } from 'svelte';
 
 	// @ts-nocheck
 	export let post;
@@ -12,25 +11,67 @@
 
 	onMount(async () => {
 		if (collectable) {
-			const res = await fetch("/api/collections/my", {
-				method: "GET",
+			const res = await fetch('/api/collections/my', {
+				method: 'GET',
 				headers: {
-					"Content-Type": "application/json",
-				},
+					'Content-Type': 'application/json'
+				}
 			});
 			collections = await res.json();
-
-			console.log(collections);
+			collections.forEach((element) => {
+				element.checked = false;
+				element.checked = element?.posts?.includes(post._id);
+			});
 			collections = collections;
 		}
 	});
 
-	function addPostToCollection() {
-		console.log("addPostToCollection");
+	/* function addPostToCollection() {
+		let cls = [];
+		collections.forEach((element) => {
+			cls.push({ id: element._id, checked: element.checked });
+		});
+		fetch('/api/collections/my', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				postId: post._id,
+				collections: cls
+			})
+		}).then((res) => {
+			if (res.status === 200) {
+
+			} else {
+				console.log('error');
+			}
+		});
+	} */
+	function addPostToCollection(collection, checked)
+	{
+		let xxx = { id: collection._id, checked: checked };
+		console.log(checked)
+		fetch('/api/collections/my', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				postId: post._id,
+				collections: [xxx],
+			})
+		}).then((res) => {
+			if (res.status === 200) {
+
+			} else {
+				console.log('error');
+			}
+		});
 	}
 </script>
 
-<div class="card" style="width: 18rem;">
+<div class="card">
 	<div class="card-header">
 		<h5><a href="/posts/{post._id}" class="link-dark">{post.title}</a></h5>
 	</div>
@@ -42,7 +83,7 @@
 			{post.description}
 		</p>
 		{#if editable === true}
-			<a href="/posts/{post._id}/edit" class="btn btn-info">Edit</a>
+			<a href="/posts/{post._id}/edit" class="btn btn-info text-decoration-none">Edit</a>
 		{/if}
 		{#if deletable === true}
 			<form action="?/delete" method="post">
@@ -52,17 +93,23 @@
 		{/if}
 	</div>
 	{#if collectable === true}
-	<form class="form" method="post" action="/collections/{post._id}/add">
-		{#each collections as collection }
-			<div class="form-check">
-				<input class="form-check-input" type="checkbox" name="collections[]" value="{collection._id}" id="{collection._id}" bind:checked={collection.checked}/>
-				<label class="form-check-label" for="{collection._id}">
-					{collection.title}
-				</label>
-			</div>
-		{/each}
-		<input type="hidden" name="_method" value="put" />
-		<button type="button" on:click={addPostToCollection} class="btn btn-primary">Add to collection</button>
-	</form>
+		<form class="form" method="post" action="/collections/{post._id}/add">
+			{#each collections as collection}
+				<div class="form-check">
+					<input
+						class="form-check-input"
+						type="checkbox"
+						name="collections[]"
+						value={collection._id}
+						id={collection._id}
+						bind:checked={collection.checked}
+						on:click={() => addPostToCollection(collection, !collection.checked)}
+					/>
+					<label class="form-check-label" for={collection._id}>
+						{collection.title}
+					</label>
+				</div>
+			{/each}
+		</form>
 	{/if}
 </div>

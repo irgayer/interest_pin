@@ -1,5 +1,12 @@
 import { redirect } from '@sveltejs/kit';
 import { users } from '$db/users';
+import { hashPassword } from '../../../lib/auth/crypto';
+
+export const load = async ({ locals }) => {
+	if (locals.user) {
+		throw redirect(302, '/posts');
+	}
+};
 
 export const actions = {
 	register: async (event) => {
@@ -25,13 +32,14 @@ export const actions = {
 				success: false
 			};
 		}
+		let dataToInsert = {
+			email,
+			username,
+			password: await hashPassword(password),
+			user_token: crypto.randomUUID()
+		}
+		users.insertOne(dataToInsert);
 
-		users.insertOne({ email, username, password });
-
-		return {
-			status: 201,
-			body: JSON.stringify({ message: 'User created' }),
-			success: true
-		};
+		throw redirect(302, '/auth/login');
 	}
 };
