@@ -3,8 +3,8 @@ import { posts } from '$db/posts';
 import { ObjectId } from 'mongodb';
 
 /** @type {import('./$types').RequestHandler} */
-export const GET = async () => {
-    let data = await collections.find({}).toArray();
+export const GET = async (event) => {
+    let data = await collections.find({author: event.locals.user.id}).toArray();
     data.forEach(element => element._id = element._id.toString());
 
     return new Response(JSON.stringify(data));
@@ -13,7 +13,6 @@ export const GET = async () => {
 
 export const POST = async({request}) => {
     let data = await request.json();
-    console.log(data);
 
     const post = posts.findOne({ _id: new ObjectId(data.postId) });
     if (!post) {
@@ -22,7 +21,6 @@ export const POST = async({request}) => {
 
     data.collections.forEach(async element => {
         const collection = await collections.findOne({ _id: new ObjectId(element) });
-        console.log(collection)
         if (!collection) {
             return;
         }

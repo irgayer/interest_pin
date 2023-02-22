@@ -5,7 +5,6 @@ start_mongo().then(() => {
 	console.log('mongo db started!');
 });
 export const handle = async ({ event, resolve }) => {
-    console.log('handle')
     const session = event.cookies.get('session');
 
     if (!session) {

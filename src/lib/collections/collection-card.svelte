@@ -1,74 +1,95 @@
 <script>
-	import { page } from "$app/stores";
-	import { onMount } from "svelte";
-
+	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
 
 	export let collection;
-    let copied;
-    let inherited;
+	let copied;
+	let inherited;
 
 	function copyCollection() {
-        fetch('/api/collections/copy', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                collectionId: collection._id
-            })
-        }).then((res) => {
-            if (res.status === 200) {
-                copied = true;
-            } else {
-                console.log('error');
-            }
-        });
-    }
+		fetch('/api/collections/copy', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				collectionId: collection._id
+			})
+		}).then((res) => {
+			if (res.status === 200) {
+				copied = true;
+			} else {
+				console.log('error');
+			}
+		});
+	}
 
-    function inheritCollection() {
-        fetch('/api/collections/inherit', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                collectionId: collection._id
-            })
-        }).then((res) => {
-            if (res.status === 200) {
-                inherited = true;
-            } else {
-                console.log('error');
-            }
-        });
-    }
+	function inheritCollection() {
+		fetch('/api/collections/inherit', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				collectionId: collection._id,
+				userId: $page.data.user.id
+			})
+		}).then((res) => {
+			if (res.status === 200) {
+				inherited = true;
+			} else {
+				console.log('error');
+			}
+		});
+	}
 
-    onMount(async () => {
-        let params = new URLSearchParams({collectionId: collection._id, userId: $page.data.user.id}).toString();
-        const url = '/api/collections/copy?' + params;
-        const s = await fetch(url).then(async res => {
-            let data = await res.json();
-            copied = data.copied;
-        });
+	function unInheritCollection() {
+		fetch('/api/collections/inherit', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				collectionId: collection._id,
+				userId: $page.data.user.id
+			})
+		}).then((res) => {
+			if (res.status === 200) {
+				inherited = false;
+			} else {
+				console.log('error');
+			}
+		});
+	}
 
-        const url2 = '/api/collections/inherit?' + params;
-        const s2 = await fetch(url2).then(async res => {
-            let data = await res.json();
-            inherited = data.inherited;
-        });
-        // const res2 = await fetch('/api/collections/inherit?' + params, {
-        //     method: 'GET',
-        //     headers: {
-        //         'Content-Type': 'application/json'
-        //     }
-        // });
-        // const data2 = await res2.json();
-        // inherited = data2.inherited;
-    });
+	onMount(async () => {
+		let params = new URLSearchParams({
+			collectionId: collection._id,
+			userId: $page.data.user.id
+		}).toString();
+		const url = '/api/collections/copy?' + params;
+		const s = await fetch(url).then(async (res) => {
+			let data = await res.json();
+			copied = data.copied;
+		});
+
+		const url2 = '/api/collections/inherit?' + params;
+		const s2 = await fetch(url2).then(async (res) => {
+			let data = await res.json();
+			inherited = data.inherited;
+		});
+		// const res2 = await fetch('/api/collections/inherit?' + params, {
+		//     method: 'GET',
+		//     headers: {
+		//         'Content-Type': 'application/json'
+		//     }
+		// });
+		// const data2 = await res2.json();
+		// inherited = data2.inherited;
+	});
 </script>
 
 <div class="card">
-
 	<div class="card-header">
 		<h5>{collection.title}</h5>
 	</div>
@@ -79,28 +100,32 @@
 			>View {collection.posts.length} posts</a
 		>
 		<div class="btn-group" role="group" aria-label="Basic example">
-            {#if !copied}
-			    <button type="button" class="btn btn-secondary" on:click={copyCollection}>Copy</button>
-            {/if}
+			{#if !copied}
+				<button type="button" class="btn btn-secondary" on:click={copyCollection}>Copy</button>
+			{/if}
+			{#if copied}
+				<button type="button" class="btn btn-secondary" disabled>Copied</button>
+			{/if}
 
-            {#if !inherited}
-			<button type="button" class="btn btn-secondary" on:click={inheritCollection}>Follow</button>
-            {/if}
-
-            {#if copied}
-                <button type="button" class="btn btn-secondary" disabled>Copied</button>
-            {/if}
-
-            {#if inherited}
-                <button type="button" class="btn btn-secondary" disabled>Following</button>
-            {/if}
+			{#if collection.author !== $page.data.user.id}
+				{#if !inherited}
+					<button type="button" class="btn btn-secondary" on:click={inheritCollection}
+						>Follow</button
+					>
+				{/if}
+				{#if inherited}
+					<button type="button" class="btn btn-secondary" on:click={unInheritCollection}>Following</button>
+				{/if}
+			{/if}
 		</div>
 	</div>
 
 	<div class="card-footer text-muted">
-		<p>{collection.type} collection</p>
-        <form class="form-inline" action="/collections/{collection._id}/delete" method="post">
-            <button type="submit" class="btn btn-primary">delete</button>
-        </form>
+		<p>{collection.type} collection. Created by: {collection.author}</p>
+		{#if collection.author === $page.data.user.id}
+			<form class="form-inline" action="/collections/{collection._id}/delete" method="post">
+				<button type="submit" class="btn btn-primary">delete</button>
+			</form>
+		{/if}
 	</div>
 </div>

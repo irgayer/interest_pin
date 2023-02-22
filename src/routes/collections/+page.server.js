@@ -1,7 +1,7 @@
 import { collections } from '$db/collections'
 
 export async function load() {
-    let data = await collections.find({type: 'public'}).toArray();
+    let data = await collections.find({type: {$ne: 'private'}}).toArray();
 
     data.forEach(element => {
         element._id = element._id.toString();

@@ -1,9 +1,10 @@
 <script>
+	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 
 	// @ts-nocheck
 	export let post;
-	export let editable;
+	export let editable = false;
 	export let deletable = false;
 
 	export let collectable = false;
@@ -24,6 +25,17 @@
 			});
 			collections = collections;
 		}
+		if (post.author === $page.data.user.id) {
+			editable = true;
+			deletable = true;
+		}
+		else {
+			editable = false;
+			deletable = false;
+		}
+
+		editable = editable;
+		deletable = deletable;
 	});
 
 	/* function addPostToCollection() {
@@ -91,25 +103,34 @@
 				<button type="submit" class="btn btn-danger">Delete</button>
 			</form>
 		{/if}
+		{#if collectable === true}
+			<form class="form" method="post" action="/collections/{post._id}/add">
+				{#each collections as collection}
+					<div class="form-check">
+						<input
+							class="form-check-input"
+							type="checkbox"
+							name="collections[]"
+							value={collection._id}
+							id={collection._id}
+							bind:checked={collection.checked}
+							on:click={() => addPostToCollection(collection, !collection.checked)}
+						/>
+						<label class="form-check-label" for={collection._id}>
+							{collection.title}
+						</label>
+					</div>
+				{/each}
+			</form>
+		{/if}
 	</div>
-	{#if collectable === true}
-		<form class="form" method="post" action="/collections/{post._id}/add">
-			{#each collections as collection}
-				<div class="form-check">
-					<input
-						class="form-check-input"
-						type="checkbox"
-						name="collections[]"
-						value={collection._id}
-						id={collection._id}
-						bind:checked={collection.checked}
-						on:click={() => addPostToCollection(collection, !collection.checked)}
-					/>
-					<label class="form-check-label" for={collection._id}>
-						{collection.title}
-					</label>
-				</div>
-			{/each}
-		</form>
-	{/if}
+	<div class="card-footer">
+		<small class="text-muted">Posted by {post.author}</small>
+		Themes:
+		<div class="btn-group align-right" role="group">
+		{#each post.themes as theme}
+			<a class="btn btn-outline-secondary btn-sm" href="/themes/{theme}">{theme}</a>
+		{/each}
+	</div>
+	</div>
 </div>

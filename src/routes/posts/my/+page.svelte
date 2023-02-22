@@ -18,6 +18,6 @@
 			<a href="/posts/{post._id}/edit" class="btn btn-info">Edit</a>
 		</div>
 	</div> -->
-	<PostCard post={post} editable={true}/>
+	<PostCard post={post} editable={true} collectable={true}/>
     {/each}
 </main>

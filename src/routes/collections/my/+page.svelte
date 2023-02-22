@@ -2,8 +2,6 @@
 	import CollectionCard from "../../../lib/collections/collection-card.svelte";
 
     export let data;
-
-    console.log(data)
 </script>
 
 <main>
@@ -22,6 +20,6 @@
                 <p>{collection.type} collection</p>
             </div>
         </div> -->
-        <CollectionCard {collection} />
+        <CollectionCard {collection}/>
     {/each}
 </main>

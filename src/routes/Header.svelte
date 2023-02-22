@@ -57,7 +57,7 @@
 					{/if}
 					{#if $page.data.user}
 						<li class="nav-item">
-							<a class="btn btn-primary active text-decoration-none" href="/im">Profile</a>
+							<a class="btn btn-primary active text-decoration-none" href="/profiles/{$page.data.user.id}">{$page.data.user.username}</a>
 						</li>
 						<li class="nav-item">
 							<form action="/auth/logout" method="POST">

@@ -58,7 +58,7 @@ export const actions = {
             throw error(404, 'Not Found');
         }
         await posts.deleteOne({_id: new ObjectId(id)});
-        throw redirect (300, '/posts/my');
+        throw redirect (301, '/posts');
         //{
         //     status: 200,
         //     body: JSON.stringify({ message: 'Post deleted' }),

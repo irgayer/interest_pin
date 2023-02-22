@@ -1,14 +1,22 @@
 import { collections } from '$db/collections'
 import { posts } from '$db/posts'
+import { redirect, error } from '@sveltejs/kit';
 import { ObjectId } from 'mongodb'
 
-export async function load({params})
+export async function load(event)
 {
-    const {id} = params;
+    const {id} = event.params;
+    const userId = event.locals.user.id;
     let collection = await collections.findOne({ _id: new ObjectId(id) });
     if (!collection) {
         return new Response(null, { status: 404 });
     }
+
+    if (collection.type === 'private' && collection.author !== userId)
+    {
+        throw error(403, 'Forbidden')
+    }
+
     // TODO: check access to private collection
     collection._id = collection._id.toString();
     let postsToReturn = [];
