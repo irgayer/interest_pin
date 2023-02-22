@@ -44,35 +44,31 @@
     }
 
     onMount(async () => {
-        const res = await fetch('/api/collections/copy', {
-            method: 'GET',
-            body: JSON.stringify({
-                collectionId: collection._id,
-                userId: $page.data.user.id
-            }),
-            headers: {
-                'Content-Type': 'application/json'
-            }
+        let params = new URLSearchParams({collectionId: collection._id, userId: $page.data.user.id}).toString();
+        const url = '/api/collections/copy?' + params;
+        const s = await fetch(url).then(async res => {
+            let data = await res.json();
+            copied = data.copied;
         });
-        const data = await res.json();
-        copied = data.copied;
 
-        const res2 = await fetch('/api/collections/inherit', {
-            method: 'GET',
-            body: JSON.stringify({
-                collectionId: collection._id,
-                userId: $page.data.user.id
-            }),
-            headers: {
-                'Content-Type': 'application/json'
-            }
+        const url2 = '/api/collections/inherit?' + params;
+        const s2 = await fetch(url2).then(async res => {
+            let data = await res.json();
+            inherited = data.inherited;
         });
-        const data2 = await res2.json();
-        inherited = data2.inherited;
+        // const res2 = await fetch('/api/collections/inherit?' + params, {
+        //     method: 'GET',
+        //     headers: {
+        //         'Content-Type': 'application/json'
+        //     }
+        // });
+        // const data2 = await res2.json();
+        // inherited = data2.inherited;
     });
 </script>
 
 <div class="card">
+
 	<div class="card-header">
 		<h5>{collection.title}</h5>
 	</div>
@@ -103,5 +99,8 @@
 
 	<div class="card-footer text-muted">
 		<p>{collection.type} collection</p>
+        <form class="form-inline" action="/collections/{collection._id}/delete" method="post">
+            <button type="submit" class="btn btn-primary">delete</button>
+        </form>
 	</div>
 </div>

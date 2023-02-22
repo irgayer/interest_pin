@@ -2,6 +2,8 @@
 	import CollectionCard from "../../../lib/collections/collection-card.svelte";
 
     export let data;
+
+    console.log(data)
 </script>
 
 <main>

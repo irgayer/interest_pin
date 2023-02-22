@@ -19,7 +19,7 @@ export const actions = {
             image,
             params: {file_name: upload}
         }
-        let collection = {type, title, description, cover, date: Date.now()};
+        let collection = {type, title, description, posts: [], cover, date: Date.now(), subs: []};
         collections.insertOne(collection);
         return {
             status: 201,

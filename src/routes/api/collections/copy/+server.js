@@ -21,16 +21,14 @@ export const POST = async ({ request }) => {
 }
 
 // TODO: check author id
-export const GET = async ({ request }) => {
-    let data = await request.json();
+export const GET = async ({ url }) => {
+    let data = {collectionId: url.searchParams.get("collectionId"), userId: url.searchParams.get("userId")}
     const collectionId = data.collectionId;
-    console.log("CHECKING: " + collectionId)
     const collection = await collections.findOne({ parent: new ObjectId(collectionId), type: "copy" });
-    console.log(collection.parent)
     if (collection)
     {
-        return new Response({copied: true}, { status: 200 });
+        return new Response(JSON.stringify({copied: true}), { status: 200 });
     }
 
-    return new Response({copied: false}, { status: 200});
+    return new Response(JSON.stringify({copied: false}), { status: 200});
 }
