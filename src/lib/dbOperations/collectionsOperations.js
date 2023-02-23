@@ -130,5 +130,27 @@ export async function getCollectionWithPosts(collectionId) {
         ])
         .toArray();
 
-    return data;
+
+    if (data.length === 0) return null;
+
+    return data[0];
+}
+
+export async function copyCollection(userId, collectionId) {
+    let data = await collections.findOne({ _id: collectionId });
+    if (!data) return null;
+
+    let copyCollection = data;
+    delete copyCollection._id;
+    copyCollection.title = copyCollection.title + " (copy)";
+    copyCollection.type = "copy";
+    copyCollection.parent = collectionId;
+    copyCollection.author = userId;
+    copyCollection.subscribers = [];
+
+    console.log(copyCollection);
+
+    let inserted = await collections.insertOne(copyCollection);
+
+    return inserted;
 }

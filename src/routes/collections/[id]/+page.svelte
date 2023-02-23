@@ -28,7 +28,7 @@
 
 <h1>{data.collection.title}</h1>
 
-{#if data.posts.length === 0}
+{#if data.collection.posts.length === 0}
     <p>No posts in this collection</p>
 {/if}
 {#each data.collection.posts as post}

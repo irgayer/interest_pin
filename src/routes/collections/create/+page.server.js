@@ -20,7 +20,7 @@ export const actions = {
             image,
             params: {file_name: upload}
         }
-        let collection = {author: new ObjectId(event.locals.user.id), type, title, description, posts: [], cover, subs: []};
+        let collection = {author: new ObjectId(event.locals.user.id), type, title, description, posts: [], cover, subscribers: []};
         collections.insertOne(collection);
         return {
             status: 201,

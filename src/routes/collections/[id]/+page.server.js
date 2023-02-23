@@ -13,7 +13,7 @@ export async function load(event)
     if (!isCollectionExists(collectionObjectId))
         throw error(404, 'Not found')
 
-    if (isUserAccessToCollection(userObjectId, collectionObjectId))
+    if (!isUserAccessToCollection(userObjectId, collectionObjectId))
     {
         throw error(403, 'Forbidden')
     }

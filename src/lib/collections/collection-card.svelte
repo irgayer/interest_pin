@@ -63,16 +63,20 @@
 	}
 
 	onMount(async () => {
+		//let params = new URLSearchParams({
+		// 	collectionId: collection._id,
+		// 	userId: $page.data.user.id
+		// }).toString();
+		// const url = '/api/collections/copy?' + params;
+		// const s = await fetch(url).then(async (res) => {
+		// 	let data = await res.json();
+		// 	copied = data.copied;
+		// });
+
 		let params = new URLSearchParams({
 			collectionId: collection._id,
 			userId: $page.data.user.id
 		}).toString();
-		const url = '/api/collections/copy?' + params;
-		const s = await fetch(url).then(async (res) => {
-			let data = await res.json();
-			copied = data.copied;
-		});
-
 		const url2 = '/api/collections/inherit?' + params;
 		const s2 = await fetch(url2).then(async (res) => {
 			let data = await res.json();
@@ -114,14 +118,19 @@
 					>
 				{/if}
 				{#if inherited}
-					<button type="button" class="btn btn-secondary" on:click={unInheritCollection}>Following</button>
+					<button type="button" class="btn btn-secondary" on:click={unInheritCollection}
+						>Following</button
+					>
 				{/if}
 			{/if}
 		</div>
 	</div>
 
 	<div class="card-footer text-muted">
-		<p>{collection.type} collection. Created by: <a href="/profiles/{collection.author._id}">{collection.author.username}</a></p>
+		<p>
+			{collection.type} collection. Created by:
+			<a href="/profiles/{collection.author._id}">{collection.author.username}</a>
+		</p>
 		{#if collection.author === $page.data.user.id}
 			<form class="form-inline" action="/collections/{collection._id}/delete" method="post">
 				<button type="submit" class="btn btn-primary">delete</button>
