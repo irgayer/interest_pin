@@ -31,7 +31,7 @@
 {#if data.posts.length === 0}
     <p>No posts in this collection</p>
 {/if}
-{#each data.posts as post}
+{#each data.collection.posts as post}
 <div>
     <PostCard post={post} editable={false}/>
     <button class="btn btn-danger" on:click={deleteFromCollection(data.collection._id, post._id)}>Delete from collection</button>

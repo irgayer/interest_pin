@@ -1,16 +1,16 @@
 import {posts} from '$db/posts'
 import { ObjectId } from 'mongodb';
 import {error, redirect } from '@sveltejs/kit';
+import { getPostById } from '../../../lib/dbOperations/postsOperations';
 
 export async function load({params})
 {
     const {id} = params;
-    let post = await posts.findOne({_id: new ObjectId(id)});
-    if (post === null)
+    let post = await getPostById(new ObjectId(id));
+    if (!post)
     {
         throw error(404, 'Post not found');
     }
-    post._id = post._id.toString();
     return {
         post: post
     }

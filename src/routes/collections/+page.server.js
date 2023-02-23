@@ -1,12 +1,8 @@
 import { collections } from '$db/collections'
+import { getAllNonPrivateCollections } from '../../lib/dbOperations/collectionsOperations';
 
 export async function load() {
-    let data = await collections.find({type: {$ne: 'private'}}).toArray();
-
-    data.forEach(element => {
-        element._id = element._id.toString();
-        console.log(element.title)
-    });
+    let data = await getAllNonPrivateCollections();
 
     return {
         collections: data

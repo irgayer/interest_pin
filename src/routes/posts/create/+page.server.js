@@ -1,4 +1,5 @@
 import { posts } from "$db/posts";
+import { ObjectId } from "mongodb";
 
 export const actions = {
     default: async(event) => {
@@ -14,7 +15,7 @@ export const actions = {
                 success: false
             }
         }
-        let post = {author: event.locals.user.id, title, image, description, params: {file_name: upload}, date: Date.now()};
+        let post = {author: new ObjectId(event.locals.user.id), title, image, description, themes: [], params: {file_name: upload}};
 
         let inserted = await posts.insertOne(post);
         return {

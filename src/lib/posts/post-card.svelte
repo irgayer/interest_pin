@@ -125,7 +125,7 @@
 		{/if}
 	</div>
 	<div class="card-footer">
-		<small class="text-muted">Posted by {post.author}</small>
+		<small class="text-muted">Posted by <a href="/profiles/{post.author._id}">{post.author.username}</a></small>
 		Themes:
 		<div class="btn-group align-right" role="group">
 		{#each post.themes as theme}

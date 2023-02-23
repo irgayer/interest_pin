@@ -41,6 +41,9 @@
 						<a class="nav-link active" href="/collections/create">Create collection</a>
 					</li>
 					{/if}
+					<li class="nav-item">
+						<a class="nav-link active" href="/themes">Themes</a>
+					</li>
 				</ul>
 				<ul class="navbar-nav mb-2 mb-lg-0">
 					{#if !$page.data.user}

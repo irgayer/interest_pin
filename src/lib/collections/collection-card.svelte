@@ -121,7 +121,7 @@
 	</div>
 
 	<div class="card-footer text-muted">
-		<p>{collection.type} collection. Created by: {collection.author}</p>
+		<p>{collection.type} collection. Created by: <a href="/profiles/{collection.author._id}">{collection.author.username}</a></p>
 		{#if collection.author === $page.data.user.id}
 			<form class="form-inline" action="/collections/{collection._id}/delete" method="post">
 				<button type="submit" class="btn btn-primary">delete</button>

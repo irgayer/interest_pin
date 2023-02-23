@@ -2,46 +2,26 @@ import { collections } from '$db/collections'
 import { posts } from '$db/posts'
 import { redirect, error } from '@sveltejs/kit';
 import { ObjectId } from 'mongodb'
+import { isCollectionExists, isUserAccessToCollection, getCollectionsByUserIdWithPosts, getCollectionWithPosts } from '../../../lib/dbOperations/collectionsOperations';
 
 export async function load(event)
 {
     const {id} = event.params;
-    const userId = event.locals.user.id;
-    let collection = await collections.findOne({ _id: new ObjectId(id) });
-    if (!collection) {
-        return new Response(null, { status: 404 });
-    }
+    const collectionObjectId = new ObjectId(id);
+    const userObjectId = new ObjectId(event.locals.user.id);
 
-    if (collection.type === 'private' && collection.author !== userId)
+    if (!isCollectionExists(collectionObjectId))
+        throw error(404, 'Not found')
+
+    if (isUserAccessToCollection(userObjectId, collectionObjectId))
     {
         throw error(403, 'Forbidden')
     }
 
-    // TODO: check access to private collection
-    collection._id = collection._id.toString();
-    let postsToReturn = [];
-    for (let i = 0; i < collection.posts.length; i++) {
-        let post = await posts.findOne({ _id: new ObjectId(collection.posts[i]) });
-        if (!post) {
-            continue;
-        }
-        post._id = post._id.toString();
-        postsToReturn.push(post);
-    }
-    // collection.posts.forEach(element => {
-    //     let post = {};
-    //     posts.findOne({ _id: new ObjectId(element) })
-    //     .then((result) => {
-    //         post = result;
-    //         post._id = post._id.toString();
-    //         console.log(post._id)
-    //         postsToReturn.push(post);
-    //     });
-    // })
+    const cls = await getCollectionWithPosts(collectionObjectId);
 
     return {
-        collection: collection,
-        posts: postsToReturn
+        collection: cls
     };
 }
 

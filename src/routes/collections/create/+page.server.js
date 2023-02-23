@@ -1,4 +1,5 @@
 import { collections } from "$db/collections";
+import { ObjectId } from "mongodb";
 
 export const actions = {
     default: async(event) => {
@@ -19,7 +20,7 @@ export const actions = {
             image,
             params: {file_name: upload}
         }
-        let collection = {author: event.locals.user.id, type, title, description, posts: [], cover, date: Date.now(), subs: []};
+        let collection = {author: new ObjectId(event.locals.user.id), type, title, description, posts: [], cover, subs: []};
         collections.insertOne(collection);
         return {
             status: 201,

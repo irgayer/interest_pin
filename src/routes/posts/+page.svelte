@@ -7,6 +7,7 @@
 <main>
 	<h2>Posts</h2>
 
+	{#if data.posts.length !== 0}
 	{#each data.posts as post}
 	<div class="row">
 		<!-- <div class="card">
@@ -25,9 +26,9 @@
 			</div>
 		</div> -->
 		<div class="col-lg-12 mb-4">
-
 			<PostCard post={post} editable={false} collectable={true}/>
 		</div>
 	</div>
 	{/each}
+	{/if}
 </main>

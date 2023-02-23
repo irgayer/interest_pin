@@ -1,11 +1,9 @@
 import { collections } from '$db/collections'
+import { ObjectId } from 'mongodb';
+import { getCollectionsByUserId } from '../../../lib/dbOperations/collectionsOperations';
 
 export async function load(event) {
-    let data = await collections.find({$or: [{author: event.locals.user.id}, {subs: event.locals.user.id} ]}).toArray();
-
-    data.forEach(element => {
-        element._id = element._id.toString();
-    });
+    let data = await getCollectionsByUserId(new ObjectId(event.locals.user.id));
 
     return {
         collections: data
