@@ -1,6 +1,4 @@
 <script>
-    import { enhance } from '$app/forms';
-    import { goto } from '$app/navigation';
     let imageBase = 'no';
     function fileChanged(event) {
         let reader = new FileReader();

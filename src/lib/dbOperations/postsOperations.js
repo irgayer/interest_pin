@@ -61,3 +61,15 @@ export async function getPostById(postObjectId)
     }
     return p[0];
 }
+
+export async function changePostById(postObjectId, postObject)
+{
+    let p = await posts.updateOne({_id: postObjectId}, {$set: postObject});
+    return p;
+}
+
+export async function deletePostById(postObjectId)
+{
+    let p = await posts.deleteOne({_id: postObjectId});
+    return p;
+}

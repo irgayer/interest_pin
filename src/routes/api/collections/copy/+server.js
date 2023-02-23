@@ -13,7 +13,6 @@ export const POST = async (event) => {
     const collectionId = data.collectionId;
     const userId = event.locals.user.id;
 
-    console.log({collectionId, userId})
 
     const collectionObjectId = new ObjectId(collectionId);
     const userObjectId = new ObjectId(userId);
@@ -25,7 +24,6 @@ export const POST = async (event) => {
 
 
     let copied = await copyCollection(userObjectId, collectionObjectId);
-    console.log(copied)
     if (copied)
         return new Response(JSON.stringify({copied: true}), { status: 200 });
 

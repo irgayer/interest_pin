@@ -6,7 +6,8 @@ import {
     isUserAccessToCollection,
     isUserSubscribedToCollection,
     subscribeUserToCollection,
-    unsubscribeUserFromCollection
+    unsubscribeUserFromCollection,
+    getCollectionWithPosts
 } from '$lib/dbOperations/collectionsOperations';
 
 
@@ -18,23 +19,31 @@ export const POST = async ({ request }) => {
     const collectionObjectId = new ObjectId(collectionId);
     const userObjectId = new ObjectId(userId);
 
+
     if (!isCollectionExists(collectionObjectId))
         throw error(404, 'Not found')
+
+    const collection = await getCollectionWithPosts(collectionObjectId);
+    if (collection.author.id === userId)
+    {
+        return new Response(JSON.stringify({subscribed: true}), { status: 204 });
+    }
 
     if (!isUserAccessToCollection(userObjectId, collectionObjectId))
         throw error(403, 'Forbidden')
 
-    if (!isUserSubscribedToCollection(userObjectId, collectionObjectId))
+    let subscribed = await isUserSubscribedToCollection(userObjectId, collectionObjectId)
+    if (!subscribed)
     {
-        subscribeUserToCollection(userObjectId, collectionObjectId);
+        await subscribeUserToCollection(userObjectId, collectionObjectId);
         return new Response(JSON.stringify({subscribed: true}), { status: 200 });
     }
     else {
-        unsubscribeUserFromCollection(userObjectId, collectionObjectId);
+        await unsubscribeUserFromCollection(userObjectId, collectionObjectId);
         return new Response(JSON.stringify({subscribed: false}), { status: 200 });
     }
 
-
+    return new Response(JSON.stringify({subscribed: false}), { status: 200 });
 
     // const collection = await collections.findOne({ _id: new ObjectId(collectionId) });
     // if (!collection) {
@@ -71,7 +80,14 @@ export const GET = async ({ url }) => {
     if (!isUserAccessToCollection(userObjectId, collectionObjectId))
         throw error(403, 'Forbidden')
 
-    if (isUserSubscribedToCollection(userObjectId, collectionObjectId))
+    const collection = await getCollectionWithPosts(collectionObjectId);
+    if (collection.author.id === userId)
+    {
+        return new Response(JSON.stringify({subscribed: true}), { status: 204 });
+    }
+
+    let subscribed = await isUserSubscribedToCollection(userObjectId, collectionObjectId);
+    if (subscribed)
     {
         return new Response(JSON.stringify({subscribed: true}), { status: 200 });
     }

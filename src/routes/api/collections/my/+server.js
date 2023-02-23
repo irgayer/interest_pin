@@ -1,12 +1,11 @@
 import { collections } from '$db/collections';
 import { posts } from '$db/posts';
 import { ObjectId } from 'mongodb';
+import { getCollectionsByAuthor, getCollectionsByUserId } from '../../../../lib/dbOperations/collectionsOperations';
 
 /** @type {import('./$types').RequestHandler} */
 export const GET = async (event) => {
-    let data = await collections.find({author: event.locals.user.id}).toArray();
-    data.forEach(element => element._id = element._id.toString());
-
+    let data = await getCollectionsByAuthor(new ObjectId(event.locals.user.id));
     return new Response(JSON.stringify(data));
 }
 

@@ -24,7 +24,6 @@ export const actions = {
 		}
 
 		const existing = await users.findOne({ email });
-		console.log(existing);
 		if (existing) {
 			return {
 				status: 400,

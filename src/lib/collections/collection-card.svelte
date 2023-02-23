@@ -4,7 +4,7 @@
 
 	export let collection;
 	let copied;
-	let inherited;
+	let subscribed;
 
 	function copyCollection() {
 		fetch('/api/collections/copy', {
@@ -36,9 +36,7 @@
 			})
 		}).then((res) => {
 			if (res.status === 200) {
-				inherited = true;
-			} else {
-				console.log('error');
+				subscribed = true;
 			}
 		});
 	}
@@ -55,8 +53,13 @@
 			})
 		}).then((res) => {
 			if (res.status === 200) {
-				inherited = false;
-			} else {
+				subscribed = false;
+			}
+			if (res.status === 204)
+			{
+				subscribed = true;
+			}
+			else {
 				console.log('error');
 			}
 		});
@@ -80,7 +83,7 @@
 		const url2 = '/api/collections/inherit?' + params;
 		const s2 = await fetch(url2).then(async (res) => {
 			let data = await res.json();
-			inherited = data.inherited;
+			subscribed = data.subscribed;
 		});
 		// const res2 = await fetch('/api/collections/inherit?' + params, {
 		//     method: 'GET',
@@ -111,13 +114,13 @@
 				<button type="button" class="btn btn-secondary" disabled>Copied</button>
 			{/if}
 
-			{#if collection.author !== $page.data.user.id}
-				{#if !inherited}
+			{#if collection.author._id !== $page.data.user.id}
+				{#if !subscribed}
 					<button type="button" class="btn btn-secondary" on:click={inheritCollection}
 						>Follow</button
 					>
 				{/if}
-				{#if inherited}
+				{#if subscribed}
 					<button type="button" class="btn btn-secondary" on:click={unInheritCollection}
 						>Following</button
 					>
@@ -129,9 +132,12 @@
 	<div class="card-footer text-muted">
 		<p>
 			{collection.type} collection. Created by:
-			<a href="/profiles/{collection.author._id}">{collection.author.username}</a>
+			<a href="/profiles/{collection.author._id}">{collection.author.username}.</a>
 		</p>
-		{#if collection.author === $page.data.user.id}
+		{#if collection.type === 'copy'}
+			<p>Copied on <a href="/collections/{collection.parent}/">this</a> collection</p>
+		{/if}
+		{#if collection.author._id === $page.data.user.id}
 			<form class="form-inline" action="/collections/{collection._id}/delete" method="post">
 				<button type="submit" class="btn btn-primary">delete</button>
 			</form>

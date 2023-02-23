@@ -19,7 +19,6 @@ export async function load(event)
     }
 
     const cls = await getCollectionWithPosts(collectionObjectId);
-
     return {
         collection: cls
     };

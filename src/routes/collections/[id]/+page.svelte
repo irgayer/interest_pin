@@ -33,8 +33,8 @@
 {/if}
 {#each data.collection.posts as post}
 <div>
-    <PostCard post={post} editable={false}/>
-    <button class="btn btn-danger" on:click={deleteFromCollection(data.collection._id, post._id)}>Delete from collection</button>
+    <button class="btn btn-danger" on:click={() => deleteFromCollection(data.collection._id, post._id)}>Delete</button>
+    <PostCard post={post} collectable={true}/>
 </div>
 {#if form?.success === true}
     <p>Post Deleted!</p>

@@ -25,7 +25,7 @@
 			});
 			collections = collections;
 		}
-		if (post.author === $page.data.user.id) {
+		if (post.author._id === $page.data.user.id) {
 			editable = true;
 			deletable = true;
 		}
@@ -63,7 +63,6 @@
 	function addPostToCollection(collection, checked)
 	{
 		let xxx = { id: collection._id, checked: checked };
-		console.log(checked)
 		fetch('/api/collections/my', {
 			method: 'POST',
 			headers: {
@@ -98,7 +97,7 @@
 			<a href="/posts/{post._id}/edit" class="btn btn-info text-decoration-none">Edit</a>
 		{/if}
 		{#if deletable === true}
-			<form action="?/delete" method="post">
+			<form action="posts/{post._id}/edit?/delete" method="post">
 				<input type="hidden" name="_method" value="delete" />
 				<button type="submit" class="btn btn-danger">Delete</button>
 			</form>
@@ -129,7 +128,7 @@
 		Themes:
 		<div class="btn-group align-right" role="group">
 		{#each post.themes as theme}
-			<a class="btn btn-outline-secondary btn-sm" href="/themes/{theme}">{theme}</a>
+			<a class="btn btn-outline-secondary btn-sm" href="/themes?{theme}">{theme}</a>
 		{/each}
 	</div>
 	</div>

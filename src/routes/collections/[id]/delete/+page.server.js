@@ -1,6 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import { collections } from '$db/collections';
 import { ObjectId } from 'mongodb';
+import { isCollectionExists } from '../../../../lib/dbOperations/collectionsOperations';
 
 export const load = async ({ session }) => {
 	throw redirect(302, '/');
@@ -9,9 +10,10 @@ export const load = async ({ session }) => {
 export const actions = {
 	default: async ({ params }) => {
 		const collectionId = params.id;
-		const collection = await collections.findOne({ _id: new ObjectId(collectionId) });
+		const collectionObjectId = new ObjectId(collectionId);
 
-		if (!collection) {
+		const exists = await isCollectionExists(collectionObjectId);
+		if (!exists) {
 			throw redirect(302, '/collections/my');
 		}
 

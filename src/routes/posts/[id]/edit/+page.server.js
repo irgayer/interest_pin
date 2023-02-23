@@ -1,16 +1,15 @@
 import { posts } from "$db/posts";
 import { redirect, error } from "@sveltejs/kit";
 import { ObjectId } from 'mongodb';
+import { getPostById, changePostById, deletePostById } from "../../../../lib/dbOperations/postsOperations";
 
 export async function load({params}) {
     const {id} = params;
-    let post = await posts.findOne({_id: new ObjectId(id)});
+    let post = getPostById(new ObjectId(id));
 
     if (!post) {
         throw error(404, 'Not Found')
     }
-
-    post._id = post._id.toString();
     if (post === null)
     {
         throw error(404, 'Not Found');
@@ -28,6 +27,8 @@ export const actions = {
         const description = data.get('description');
         const {id} = event.params;
 
+
+
         if (!title) {
             return {
                 status: 400,
@@ -36,13 +37,13 @@ export const actions = {
             }
         }
 
-        let post = await posts.findOne({_id: new ObjectId(id)});
+        let post = getPostById(new ObjectId(id));
         if (post === null)
         {
             throw error(404, 'Not Found');
         }
 
-        await posts.updateOne({_id: new ObjectId(id)}, {$set: {title: title, description: description}});
+        await changePostById(new ObjectId(id), {title, description});
         return {
             status: 200,
             body: JSON.stringify({ message: 'Post updated' }),
@@ -51,13 +52,13 @@ export const actions = {
     },
     delete: async (event) => {
         const {id} = event.params;
-        const existing = await posts.findOne({_id: new ObjectId(id)});
+        const existing = getPostById(new ObjectId(id));
 
         if (existing === null)
         {
             throw error(404, 'Not Found');
         }
-        await posts.deleteOne({_id: new ObjectId(id)});
+        await deletePostById(new ObjectId(id));
         throw redirect (301, '/posts');
         //{
         //     status: 200,

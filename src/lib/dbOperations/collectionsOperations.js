@@ -1,11 +1,13 @@
 import { collections } from '$db/collections';
+import { getPostById } from './postsOperations';
+import { ObjectId } from 'mongodb';
 
 export async function isCollectionExists(collectionId) {
-    let data = await collections.find({ _id: collectionId }).toArray();
+	let data = await collections.find({ _id: collectionId }).toArray();
 
-    if (data.length === 0) return false;
+	if (data.length === 0) return false;
 
-    return true;
+	return true;
 }
 
 export async function getAllNonPrivateCollections() {
@@ -21,7 +23,13 @@ export async function getAllNonPrivateCollections() {
 				}
 			},
 			{ $unwind: '$author' },
-			{ $addFields: { _id: { $toString: '$_id' } } }
+			{
+				$addFields: {
+					_id: { $toString: '$_id' },
+					parent: { $toString: '$parent' },
+					subscribers: { $map: { input: '$subscribers', in: { $toString: '$$this' } } }
+				}
+			}
 		])
 		.toArray();
 
@@ -29,6 +37,34 @@ export async function getAllNonPrivateCollections() {
 }
 
 export async function getCollectionsByUserId(userId) {
+	let data = await collections
+		.aggregate([
+			{ $match: { $or: [{author: userId}, {subscribers: userId}] } },
+			{
+				$lookup: {
+					from: 'users',
+					localField: 'author',
+					foreignField: '_id',
+					as: 'author',
+					pipeline: [{ $project: { username: 1, _id: { $toString: '$_id' } } }]
+				}
+			},
+			{ $unwind: '$author' },
+			{
+				$addFields: {
+					_id: { $toString: '$_id' },
+					parent: { $toString: '$parent' },
+					subscribers: { $map: { input: '$subscribers', in: { $toString: '$$this' } } }
+				}
+			}
+		])
+		.toArray();
+
+	return data;
+}
+
+export async function getCollectionsByAuthor(userId)
+{
 	let data = await collections
 		.aggregate([
 			{ $match: { author: userId } },
@@ -42,23 +78,54 @@ export async function getCollectionsByUserId(userId) {
 				}
 			},
 			{ $unwind: '$author' },
-			{ $addFields: { _id: { $toString: '$_id' } } }
+			{
+				$addFields: {
+					_id: { $toString: '$_id' },
+					parent: { $toString: '$parent' },
+					subscribers: { $map: { input: '$subscribers', in: { $toString: '$$this' } } }
+				}
+			}
 		])
 		.toArray();
 
 	return data;
 }
 
-
-
-export async function isUserAccessToCollection(userId, collectionId)
+export async function getFollowingCollectionsByUserId(userId)
 {
-    let data = await collections.findOne({_id: collectionId});
-    if (data.type === 'public') return true;
+    let data = await collections
+		.aggregate([
+			{ $match: { subscribers: userId } },
+			{
+				$lookup: {
+					from: 'users',
+					localField: 'author',
+					foreignField: '_id',
+					as: 'author',
+					pipeline: [{ $project: { username: 1, _id: { $toString: '$_id' } } }]
+				}
+			},
+			{ $unwind: '$author' },
+			{
+				$addFields: {
+					_id: { $toString: '$_id' },
+					parent: { $toString: '$parent' },
+					subscribers: { $map: { input: '$subscribers', in: { $toString: '$$this' } } }
+				}
+			}
+		])
+		.toArray();
 
-    if (data.type === 'private' && data.author === userId) return true;
+	return data;
+}
 
-    return false;
+export async function isUserAccessToCollection(userId, collectionId) {
+	let data = await collections.findOne({ _id: collectionId });
+	if (data.type === 'public') return true;
+
+	if (data.type === 'private' && data.author === userId) return true;
+
+	return false;
 }
 
 export async function isUserSubscribedToCollection(userId, collectionId) {
@@ -70,87 +137,90 @@ export async function isUserSubscribedToCollection(userId, collectionId) {
 }
 
 export async function subscribeUserToCollection(userId, collectionId) {
-    let collection = await collections.find({_id: collectionId});
+	let collection = await collections.findOne({ _id: collectionId });
 
-    if (collection.subscribers.includes(userId)) return false;
+	if (collection.subscribers.includes(userId)) return false;
 
-    collection.subscribers.push(userId);
-    await collections.updateOne({_id: collectionId}, {$set: {subscribers: collection.subscribers}});
+	collection.subscribers.push(userId);
 
-    return true;
+	await collections.updateOne(
+		{ _id: collectionId },
+		{ $set: { subscribers: collection.subscribers } }
+	);
+
+	return true;
 }
 
-export async function unsubscribeUserFromCollection(userId, collectionId)
-{
-    let collection = await collections.find({_id: collectionId});
-    if (!collection.subscribers.includes(userId)) return false;
+export async function unsubscribeUserFromCollection(userId, collectionId) {
+	let collection = await collections.findOne({ _id: collectionId });
+    let flag = true;
 
-    collection.subscribers = collection.subscribers.filter(x => x !== userId);
-    await collections.updateOne({_id: collectionId}, {$set: {subscribers: collection.subscribers}});
-    return true;
+    if (!flag) return false;
+
+    collection.subscribers = collection.subscribers.filter((item) => item.toString() !== userId.toString());
+
+	await collections.updateOne(
+		{ _id: collectionId },
+		{ $set: { subscribers: collection.subscribers } }
+	);
+
+	return true;
 }
 
 export async function getCollectionWithPosts(collectionId) {
-    let data = await collections
-        .aggregate([
-            { $match: { _id: collectionId } },
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'author',
-                    foreignField: '_id',
-                    as: 'author',
-                    pipeline: [{ $project: { username: 1, _id: { $toString: '$_id' } } }]
-                }
-            },
-            { $unwind: '$author' },
-            {
-                $lookup: {
-                    from: 'posts',
-                    localField: 'posts',
-                    foreignField: '_id',
-                    as: 'posts',
-                    pipeline: [
-                        { $project: { title: 1, _id: { $toString: '$_id' }, description: 1, tags: 1, author: 1 } },
-                        {
-                            $lookup: {
-                                from: 'users',
-                                localField: 'author',
-                                foreignField: '_id',
-                                as: 'author',
-                                pipeline: [{ $project: { username: 1, _id: { $toString: '$_id' } } }]
-                            }
-                        },
-                        { $unwind: '$author' }
-                    ]
-                }
-            },
-            { $unwind: '$author' },
-            { $addFields: { _id: { $toString: '$_id' } } }
-        ])
-        .toArray();
+	let data = await collections
+		.aggregate([
+			{ $match: { _id: collectionId } },
+			{
+				$lookup: {
+					from: 'users',
+					localField: 'author',
+					foreignField: '_id',
+					as: 'author',
+					pipeline: [{ $project: { username: 1, _id: { $toString: '$_id' } } }]
+				}
+			},
+			{ $unwind: '$author' },
+			{ $unwind: '$author' },
+			{
+				$addFields: {
+					_id: { $toString: '$_id' },
+					parent: { $toString: '$parent' },
+					subscribers: { $map: { input: '$subscribers', in: { $toString: '$$this' } } }
+				}
+			}
+		])
+		.toArray();
 
+	data = data[0];
+	let posts = []
+	for (let i = 0; i < data.posts.length; i++) {
+		let post = await getPostById(new ObjectId(data.posts[i]))
+		if (!post)
+			continue;
+		posts.push(post);
+	}
 
-    if (data.length === 0) return null;
+	data.posts = posts;
 
-    return data[0];
+	if (data.length === 0) return null;
+
+	return data;
 }
 
 export async function copyCollection(userId, collectionId) {
-    let data = await collections.findOne({ _id: collectionId });
-    if (!data) return null;
+	let data = await collections.findOne({ _id: collectionId });
+	if (!data) return null;
 
-    let copyCollection = data;
-    delete copyCollection._id;
-    copyCollection.title = copyCollection.title + " (copy)";
-    copyCollection.type = "copy";
-    copyCollection.parent = collectionId;
-    copyCollection.author = userId;
-    copyCollection.subscribers = [];
+	let copyCollection = data;
+	delete copyCollection._id;
+	copyCollection.title = copyCollection.title + ' (copy)';
+	copyCollection.type = 'copy';
+	copyCollection.parent = collectionId;
+	copyCollection.author = userId;
+	copyCollection.subscribers = [userId];
 
-    console.log(copyCollection);
+	let inserted = await collections.insertOne(copyCollection);
 
-    let inserted = await collections.insertOne(copyCollection);
-
-    return inserted;
+	return inserted;
 }
