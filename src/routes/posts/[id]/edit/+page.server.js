@@ -52,6 +52,7 @@ export const actions = {
     },
     delete: async (event) => {
         const {id} = event.params;
+        console.log("deleting post")
         const existing = getPostById(new ObjectId(id));
 
         if (existing === null)

@@ -38,6 +38,21 @@
 		deletable = deletable;
 	});
 
+	// function deletePost() {
+	// 	fetch('/posts//' + post._id, {
+	// 		method: 'DELETE',
+	// 		headers: {
+	// 			'Content-Type': 'application/json'
+	// 		}
+	// 	}).then((res) => {
+	// 		if (res.status === 200) {
+	// 			window.location.href = '/posts';
+	// 		} else {
+	// 			console.log('error');
+	// 		}
+	// 	});
+	// }
+
 	/* function addPostToCollection() {
 		let cls = [];
 		collections.forEach((element) => {
@@ -97,7 +112,10 @@
 			<a href="/posts/{post._id}/edit" class="btn btn-info text-decoration-none">Edit</a>
 		{/if}
 		{#if deletable === true}
-			<form action="posts/{post._id}/edit?/delete" method="post">
+			<!-- <button on:click={deletePost} type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+				Delete
+			</button>	 -->
+			<form action="/posts/{post._id}/edit?/delete" method="post">
 				<input type="hidden" name="_method" value="delete" />
 				<button type="submit" class="btn btn-danger">Delete</button>
 			</form>

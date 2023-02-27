@@ -17,7 +17,7 @@ export const actions = {
 			throw redirect(302, '/collections/my');
 		}
 
-		if (collection) {
+		if (exists) {
 			await collections.deleteOne({ _id: new ObjectId(collectionId) });
 			throw redirect(302, '/collections/my');
 		}
